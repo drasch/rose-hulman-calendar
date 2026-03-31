@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rose-Hulman Academic Calendars</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #a61f2d; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        .calendar-list { list-style: none; padding: 0; }
+        .calendar-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .calendar-item h3 { margin: 0 0 10px 0; color: #333; }
+        .calendar-item p { margin: 0 0 15px 0; color: #666; font-size: 14px; }
+        .download-link {
+            display: inline-block;
+            background: #a61f2d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .download-link:hover { background: #8b1a25; }
+        .info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rose-Hulman Academic Calendars</h1>
+        <p class="subtitle">iCalendar (.ics) files for import into your calendar application</p>
+
+        <ul class="calendar-list">
+            <li class="calendar-item">
+                <h3>2025-26 Academic Year</h3>
+                <p>53 events including quarter dates, breaks, holidays, and deadlines</p>
+                <a href="rose_hulman_2025-26.ics" class="download-link">Download ICS</a>
+            </li>
+            <li class="calendar-item">
+                <h3>2026-27 Academic Year</h3>
+                <p>56 events including quarter dates, breaks, holidays, and deadlines</p>
+                <a href="rose_hulman_2026-27.ics" class="download-link">Download ICS</a>
+            </li>
+            <li class="calendar-item">
+                <h3>Combined 2025-27</h3>
+                <p>109 events covering both academic years in a single calendar</p>
+                <a href="rose_hulman_2025-27.ics" class="download-link">Download ICS</a>
+            </li>
+        </ul>
+
+        <div class="info">
+            <strong>How to use:</strong> Click a download link, then import the .ics file into
+            Google Calendar, Apple Calendar, Outlook, or any calendar application that supports iCalendar format.
+        </div>
+    </div>
+</body>
+</html>
