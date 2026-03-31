@@ -24,5 +24,6 @@ Thumbs.db
 
 # Project specific
 *.ics
+*.json
 .sync-staging/
 tv-backup/

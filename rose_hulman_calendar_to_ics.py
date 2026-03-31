@@ -15,8 +15,9 @@ Output:
 """
 
 from datetime import datetime, timedelta
+import json
 import uuid
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any
 
 
 def generate_uid() -> str:
@@ -241,6 +242,25 @@ def generate_ics_file(events: List[Tuple[str, str, str, bool]],
     print(f"Generated: {output_path} ({len(events)} events)")
 
 
+def generate_json_file(events: List[Tuple[str, str, str, bool]],
+                       output_path: str) -> None:
+    """Generate a JSON file from a list of events for the web renderer."""
+    json_events: List[Dict[str, Any]] = []
+
+    for summary, start_str, end_str, all_day in events:
+        json_events.append({
+            "title": f"RH: {summary}",
+            "start": start_str,
+            "end": end_str,
+            "allDay": all_day
+        })
+
+    with open(output_path, "w") as f:
+        json.dump(json_events, f, indent=2)
+
+    print(f"Generated: {output_path} ({len(events)} events)")
+
+
 def main():
     """Main entry point."""
     print("Rose-Hulman Academic Calendar to ICS Converter")
@@ -252,6 +272,7 @@ def main():
         "Rose-Hulman 2025-26",
         "rose_hulman_2025-26.ics"
     )
+    generate_json_file(CALENDAR_2025_26, "calendar_2025-26.json")
 
     # Generate 2026-27 calendar
     generate_ics_file(
@@ -259,6 +280,7 @@ def main():
         "Rose-Hulman 2026-27",
         "rose_hulman_2026-27.ics"
     )
+    generate_json_file(CALENDAR_2026_27, "calendar_2026-27.json")
 
     # Generate merged calendar (2025-27)
     merged_events = CALENDAR_2025_26 + CALENDAR_2026_27
@@ -267,6 +289,7 @@ def main():
         "Rose-Hulman 2025-27",
         "rose_hulman_2025-27.ics"
     )
+    generate_json_file(merged_events, "calendar_2025-27.json")
 
     print("=" * 50)
     print("Done! Import the .ics files into your calendar application.")

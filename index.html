@@ -3,78 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rose-Hulman Academic Calendars</title>
+    <title>Rose-Hulman Academic Calendar</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
             background: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 { color: #a61f2d; margin-bottom: 10px; }
-        .subtitle { color: #666; margin-bottom: 30px; }
-        .calendar-list { list-style: none; padding: 0; }
-        .calendar-item {
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
             padding: 20px;
-            margin-bottom: 15px;
         }
-        .calendar-item h3 { margin: 0 0 10px 0; color: #333; }
-        .calendar-item p { margin: 0 0 15px 0; color: #666; font-size: 14px; }
-        .download-link {
-            display: inline-block;
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #a61f2d; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 20px; }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .control-group { display: flex; align-items: center; gap: 10px; }
+        label { font-weight: 500; color: #333; }
+        select, button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        button {
             background: #a61f2d;
             color: white;
-            padding: 10px 20px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
+            border: none;
         }
-        .download-link:hover { background: #8b1a25; }
-        .info {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 30px;
+        button:hover { background: #8b1a25; }
+        .download-btn { background: #2e7d32; }
+        .download-btn:hover { background: #1b5e20; }
+        .calendar-grid {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #a61f2d;
+            color: white;
+            padding: 15px 0;
+        }
+        .calendar-header div { text-align: center; font-weight: 600; font-size: 14px; }
+        .calendar-body {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e0e0e0;
+        }
+        .calendar-day {
+            background: white;
+            min-height: 120px;
+            padding: 8px;
+            position: relative;
+        }
+        .calendar-day.other-month { background: #f9f9f9; color: #999; }
+        .calendar-day.today { background: #fff3e0; }
+        .day-number {
+            font-weight: 600;
             font-size: 14px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .calendar-day.other-month .day-number { color: #bbb; }
+        .calendar-day.today .day-number { color: #e65100; }
+        .event {
+            font-size: 11px;
+            padding: 3px 6px;
+            margin-bottom: 3px;
+            border-radius: 3px;
+            background: #e3f2fd;
+            color: #1565c0;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .event:hover { background: #bbdefb; }
+        .event.holiday { background: #ffebee; color: #c62828; }
+        .event.holiday:hover { background: #ffcdd2; }
+        .event.exam { background: #fff3e0; color: #e65100; }
+        .event.exam:hover { background: #ffe0b2; }
+        .event.break { background: #e8f5e9; color: #2e7d32; }
+        .event.break:hover { background: #c8e6c9; }
+        .event-tooltip {
+            position: fixed;
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+            pointer-events: none;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .event-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: #333 transparent transparent;
+        }
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .month-nav h2 { color: #333; font-size: 20px; }
+        .nav-btn {
+            background: none;
+            border: 1px solid #ddd;
+            color: #333;
+            padding: 8px 16px;
+            font-size: 16px;
+        }
+        .nav-btn:hover { background: #e0e0e0; }
+        .legend {
+            display: flex;
+            gap: 20px;
+            padding: 15px 20px;
+            background: #fafafa;
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+        .list-view {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .list-view h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #a61f2d;
+        }
+        .list-event {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .list-event:last-child { border-bottom: none; }
+        .list-date {
+            min-width: 100px;
+            font-weight: 600;
+            color: #a61f2d;
+        }
+        .list-title { flex: 1; color: #333; }
+        .view-toggle { background: #666; }
+        .view-toggle:hover { background: #444; }
+        .hidden { display: none; }
+        @media (max-width: 768px) {
+            .calendar-day { min-height: 60px; padding: 4px; }
+            .day-number { font-size: 12px; }
+            .event { font-size: 9px; padding: 2px 4px; }
+            .calendar-header div { font-size: 12px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Rose-Hulman Academic Calendars</h1>
-        <p class="subtitle">iCalendar (.ics) files for import into your calendar application</p>
+        <h1>Rose-Hulman Academic Calendar</h1>
+        <p class="subtitle">2025-2027 Academic Years</p>
 
-        <ul class="calendar-list">
-            <li class="calendar-item">
-                <h3>2025-26 Academic Year</h3>
-                <p>53 events including quarter dates, breaks, holidays, and deadlines</p>
-                <a href="rose_hulman_2025-26.ics" class="download-link">Download ICS</a>
-            </li>
-            <li class="calendar-item">
-                <h3>2026-27 Academic Year</h3>
-                <p>56 events including quarter dates, breaks, holidays, and deadlines</p>
-                <a href="rose_hulman_2026-27.ics" class="download-link">Download ICS</a>
-            </li>
-            <li class="calendar-item">
-                <h3>Combined 2025-27</h3>
-                <p>109 events covering both academic years in a single calendar</p>
-                <a href="rose_hulman_2025-27.ics" class="download-link">Download ICS</a>
-            </li>
-        </ul>
+        <div class="controls">
+            <div class="control-group">
+                <label for="yearSelect">Academic Year:</label>
+                <select id="yearSelect">
+                    <option value="2025-27">2025-2027 (Combined)</option>
+                    <option value="2025-26">2025-2026</option>
+                    <option value="2026-27">2026-2027</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <button id="viewToggle" class="view-toggle">Switch to List View</button>
+            </div>
+            <div class="control-group">
+                <a id="downloadLink" href="rose_hulman_2025-27.ics" download style="text-decoration: none;">
+                    <button class="download-btn">Download ICS</button>
+                </a>
+            </div>
+        </div>
 
-        <div class="info">
-            <strong>How to use:</strong> Click a download link, then import the .ics file into
-            Google Calendar, Apple Calendar, Outlook, or any calendar application that supports iCalendar format.
+        <div id="calendarView" class="calendar-view">
+            <div class="calendar-grid">
+                <div class="month-nav">
+                    <button class="nav-btn" id="prevMonth">&larr; Previous</button>
+                    <h2 id="monthYear">Month Year</h2>
+                    <button class="nav-btn" id="nextMonth">Next &rarr;</button>
+                </div>
+                <div class="calendar-header">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+                <div class="calendar-body" id="calendarBody"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e3f2fd;"></div>
+                        <span>Regular Event</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffebee;"></div>
+                        <span>Holiday</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fff3e0;"></div>
+                        <span>Exam/Finals</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e8f5e9;"></div>
+                        <span>Break</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="listView" class="list-view hidden">
+            <h3>All Events</h3>
+            <div id="listContent"></div>
         </div>
     </div>
+
+    <script>
+        let currentDate = new Date();
+        let currentYear = '2025-27';
+        let calendarData = [];
+        let tooltip = null;
+
+        async function loadCalendarData(year) {
+            try {
+                const response = await fetch(`calendar_${year}.json`);
+                calendarData = await response.json();
+                renderCalendar();
+                renderList();
+            } catch (error) {
+                console.error('Error loading calendar data:', error);
+                document.getElementById('calendarBody').innerHTML =
+                    '<div style="padding: 40px; text-align: center; color: #666;">Failed to load calendar data. Please try again.</div>';
+            }
+        }
+
+        function getEventsForDate(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            return calendarData.filter(event => {
+                const eventStart = new Date(event.start);
+                const eventEnd = new Date(event.end);
+                const checkDate = new Date(dateStr);
+                const adjustedEnd = new Date(eventEnd);
+                if (event.allDay) adjustedEnd.setDate(adjustedEnd.getDate());
+                return checkDate >= eventStart && checkDate <= adjustedEnd;
+            });
+        }
+
+        function getEventClass(title) {
+            const lower = title.toLowerCase();
+            if (lower.includes('holiday') || lower.includes('no classes')) return 'holiday';
+            if (lower.includes('exam') || lower.includes('final')) return 'exam';
+            if (lower.includes('break')) return 'break';
+            return '';
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            document.getElementById('monthYear').textContent =
+                currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startPadding = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            const today = new Date();
+            const isToday = (day) =>
+                today.getDate() === day &&
+                today.getMonth() === month &&
+                today.getFullYear() === year;
+
+            let html = '';
+
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            for (let i = startPadding - 1; i >= 0; i--) {
+                const day = prevMonthDays - i;
+                html += `<div class="calendar-day other-month"><div class="day-number">${day}</div></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const events = getEventsForDate(date);
+                const todayClass = isToday(day) ? 'today' : '';
+
+                let eventsHtml = '';
+                events.forEach(event => {
+                    const eventClass = getEventClass(event.title);
+                    const displayTitle = event.title.replace('RH: ', '');
+                    eventsHtml += `<div class="event ${eventClass}" data-title="${event.title}" data-date="${event.start}">${displayTitle}</div>`;
+                });
+
+                html += `<div class="calendar-day ${todayClass}"><div class="day-number">${day}</div>${eventsHtml}</div>`;
+            }
+
+            const endPadding = (7 - ((startPadding + daysInMonth) % 7)) % 7;
+            for (let day = 1; day <= endPadding; day++) {
+                html += `<div class="calendar-day other-month"><div class="day-number">${day}</div></div>`;
+            }
+
+            document.getElementById('calendarBody').innerHTML = html;
+
+            document.querySelectorAll('.event').forEach(el => {
+                el.addEventListener('mouseenter', showTooltip);
+                el.addEventListener('mouseleave', hideTooltip);
+            });
+        }
+
+        function renderList() {
+            const sorted = [...calendarData].sort((a, b) => new Date(a.start) - new Date(b.start));
+
+            let html = '';
+            let currentMonth = '';
+
+            sorted.forEach(event => {
+                const date = new Date(event.start);
+                const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+                if (monthYear !== currentMonth) {
+                    currentMonth = monthYear;
+                    html += `<h4 style="margin: 20px 0 10px; color: #a61f2d; border-bottom: 1px solid #ddd; padding-bottom: 5px;">${monthYear}</h4>`;
+                }
+
+                const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                const displayTitle = event.title.replace('RH: ', '');
+                html += `<div class="list-event"><div class="list-date">${dateStr}</div><div class="list-title">${displayTitle}</div></div>`;
+            });
+
+            document.getElementById('listContent').innerHTML = html || '<p style="color: #666;">No events found.</p>';
+        }
+
+        function showTooltip(e) {
+            if (tooltip) tooltip.remove();
+            tooltip = document.createElement('div');
+            tooltip.className = 'event-tooltip';
+            tooltip.innerHTML = `<strong>${e.target.dataset.title}</strong><br>${e.target.dataset.date}`;
+            document.body.appendChild(tooltip);
+            const rect = e.target.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+            tooltip.style.top = `${rect.top - tooltip.offsetHeight - 8}px`;
+        }
+
+        function hideTooltip() {
+            if (tooltip) { tooltip.remove(); tooltip = null; }
+        }
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        document.getElementById('yearSelect').addEventListener('change', (e) => {
+            currentYear = e.target.value;
+            document.getElementById('downloadLink').href = `rose_hulman_${currentYear}.ics`;
+            loadCalendarData(currentYear);
+        });
+
+        let isListView = false;
+        document.getElementById('viewToggle').addEventListener('click', () => {
+            isListView = !isListView;
+            document.getElementById('calendarView').classList.toggle('hidden', isListView);
+            document.getElementById('listView').classList.toggle('hidden', !isListView);
+            document.getElementById('viewToggle').textContent = isListView ? 'Switch to Calendar View' : 'Switch to List View';
+        });
+
+        loadCalendarData(currentYear);
+    </script>
 </body>
 </html>
