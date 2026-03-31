@@ -230,7 +230,7 @@ def generate_ics_file(events: List[Tuple[str, str, str, bool]],
         if all_day:
             end = end + timedelta(days=1)
 
-        event = create_ics_event(summary, start, end, all_day=all_day)
+        event = create_ics_event(f"RH: {summary}", start, end, all_day=all_day)
         lines.append(event)
 
     lines.append(create_ics_footer())
